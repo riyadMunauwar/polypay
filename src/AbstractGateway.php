@@ -3,7 +3,7 @@
 namespace Riyad\Polypay;
 
 use Riyad\Polypay\Contracts\GatewayContract;
-use Riyad\Polypay\DTO\Payment;
+use Riyad\Polypay\DTO\BaseDTO;
 use Riyad\Polypay\DTO\Config;
 use Riyad\Polypay\DTO\PaymentResult;
 
@@ -41,5 +41,5 @@ abstract class AbstractGateway implements GatewayContract
      * @param Payment $dto Payment data transfer object containing the payment details
      * @return PaymentResult Result of the payment processing
      */
-    abstract public function pay(Payment $dto): PaymentResult;
+    abstract public function pay(BaseDTO $dto): PaymentResult;
 }

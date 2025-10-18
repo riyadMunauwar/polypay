@@ -3,8 +3,9 @@
 namespace Riyad\Polypay\Contracts;
 
 use Riyad\Polypay\Contracts\GatewayContract;
-use Riyad\Polypay\DTO\Payment;
+use Riyad\Polypay\DTO\BaseDTO;
 use Riyad\Polypay\DTO\PaymentResult;
+use Riyad\Polypay\DTO\PaymentVerification;
 
 /**
  * Interface PaymentManagerContract
@@ -48,6 +49,15 @@ interface PaymentManagerContract
     public function gateway(string $gateway): static;
 
     /**
+     * Retrieve a payment gateway instance by its identifier.
+     *
+     * @param string $gateway The identifier or name of the gateway to retrieve.
+     *
+     * @return GatewayContract The resolved gateway instance.
+     */
+    public function getGateway(string $gateway) : GatewayContract;
+
+    /**
      * Process a payment using the currently active gateway.
      *
      * @param Payment $dto Payment data transfer object
@@ -55,7 +65,17 @@ interface PaymentManagerContract
      *
      * @throws \RuntimeException If no gateway is selected
      */
-    public function pay(Payment $dto): PaymentResult;
+    public function pay(BaseDTO $dto): PaymentResult;
+
+    /**
+     * Verify a payment using the provided gateway.
+     *
+     * @param PaymentVerification $dto     Data Transfer Object containing verification details.
+     * @param string              $gateway Identifier for the payment gateway to use.
+     *
+     * @return bool True if the payment is successfully verified, otherwise false.
+     */
+    public function verify(PaymentVerification $dto) : bool;
 
     /**
      * Apply a callback function to all registered gateways and collect results.

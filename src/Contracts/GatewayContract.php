@@ -2,7 +2,7 @@
 
 namespace Riyad\Polypay\Contracts;
 
-use Riyad\Polypay\DTO\Payment;
+use Riyad\Polypay\DTO\BaseDTO;
 use Riyad\Polypay\DTO\PaymentResult;
 use Riyad\Polypay\DTO\Config;
 
@@ -42,5 +42,5 @@ interface GatewayContract
      *
      * @throws \RuntimeException If payment cannot be processed or fails due to gateway errors
      */
-    public function pay(Payment $dto): PaymentResult;
+    public function pay(BaseDTO $dto): PaymentResult;
 }

@@ -66,18 +66,40 @@ abstract class BaseDTO implements JsonSerializable
     }
 
     /**
-     * Validate required public properties (those without default values).
+     * Validate that all required public properties are set.
      *
-     * @throws InvalidArgumentException If any required property is missing
+     * This method checks all public properties of the current object and ensures
+     * that they have a value. Properties are considered required if:
+     *   - They do not have a default value.
+     *   - They are not nullable (e.g., `?string`) or of type `mixed`.
+     *
+     * If any required property is missing, an `InvalidArgumentException` is thrown.
+     *
+     * @throws InvalidArgumentException If a required property is not set.
      */
     protected function validateRequiredProperties(): void
     {
         $reflection = new ReflectionClass($this);
-        
+
         foreach ($reflection->getProperties(ReflectionProperty::IS_PUBLIC) as $prop) {
             $name = $prop->getName();
-            $hasDefault = $prop->hasDefaultValue();
-            if (!$hasDefault && !isset($this->$name)) {
+
+            // Skip properties that have a default value
+            if ($prop->hasDefaultValue()) {
+                continue;
+            }
+
+            $type = $prop->getType();
+
+            // Skip if type allows null or is mixed
+            if ($type !== null) {
+                if ($type->allowsNull() || $type->getName() === 'mixed') {
+                    continue;
+                }
+            }
+
+            // Check if the property is set
+            if (!isset($this->{$name})) {
                 throw new InvalidArgumentException("Required property '{$name}' is missing");
             }
         }

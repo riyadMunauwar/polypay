@@ -3,11 +3,12 @@
 require_once 'vendor/autoload.php';
 
 use Riyad\Polypay\DTO\Config;
-use Riyad\Polypay\DTO\Payment;
+use Riyad\Polypay\DTO\PaystationDTO;
 use Riyad\Polypay\DTO\PaymentResult;
+use Riyad\Polypay\DTO\PaystationGatewayConfig;
 use Riyad\Polypay\PaymentManager;
 use Riyad\Polypay\GatewayRegistry;
-use Riyad\Polypay\Gateways\Giopay;
+use Riyad\Polypay\Gateways\Paystation;
 use Riyad\Polypay\Contracts\BeforePaymentProcessContract;
 use Riyad\Polypay\Contracts\AfterPaymentSuccessContract;
 use Riyad\Polypay\Contracts\AfterPaymentFailedContract;
@@ -15,43 +16,16 @@ use Riyad\Polypay\Contracts\HookContract;
 use Riyad\Polypay\Constants\HookReturnMode;
 use Riyad\Polypay\HookRegistry;
 
-// $registry = GatewayRegistry::init();
+$registry = GatewayRegistry::init();
+$hookRegistry = HookRegistry::init();
 
 
+$manager = PaymentManager::init($registry, $hookRegistry);
 
-// // $registry->unregister('nagad');
+$manager->register('paystation', function(){
+    return new Paystation();
+}, ['config' => new PaystationGatewayConfig(['merchantId' => '1066-1746978236', 'password' => 'B@k$8236', 'callbackUrl' => 'Hello', 'payWithCharge' => true])]);
 
-// // $registry->clear();
-
-// // $gateway = $registry->getMeta('nagad');
-
-// $manager = PaymentManager::init($registry);
-
-// $manager->register('giopay', function(){
-//     return new Giopay();
-// });
-
-// $manager->register('aamarpay', function(){
-//     return new Giopay();
-// });
-
-// $registry->unregister('aamarpay', function(){
-//     return new Giopay();
-// });
-
-// $manager->register('nagad', function(){
-//     return new Giopay();
-// });
-
-// $manager->register('nagad', function(){
-//     return new Giopay();
-// });
-
-// // $filtered = $manager->map(function($g) {
-// //     return [$g->name() => $g->config()->description];
-// // });
-
-// // print_r($filtered);
 
 class CreateTransction implements AfterPaymentSuccessContract
 {
@@ -64,32 +38,44 @@ class CreateTransction implements AfterPaymentSuccessContract
     }
 }
 
-// $manager->onBeforePaymentProcess(CreateTransction::class);
+$manager->onBeforePaymentProcess(function($dto, $gatewayName){
+    var_dump('before_payment_process');
 
-// $manager->onBeforePaymentProcess(function($dto, $gateway){
-//     var_dump('Continue...');
-//     return $dto;
-// });
+    return $dto;
+});
 
-// $manager->onAfterPaymentSuccess(function($dto){
-//     var_dump($dto);
-//     var_dump('Success...');
-// });
+$manager->onBeforePaymentProcess(function($dto, $gateway){
+    var_dump($dto);
+    return $dto;
+});
 
-// $manager->onAfterPaymentFailed(function($dto){
-//     var_dump('Failed');
-// });
+$manager->onAfterPaymentSuccess(function($dto){
+    var_dump('Success...');
+});
 
-// $payment = new Payment([
-//     'id' => rand(1, 1000),
-//     'customerId' => rand(100, 500),
-//     'amount' => (string) rand(1, 50),
-//     'currency' => 'BDT',
-//     'phonenumber' => '01794263387',
-//     'email' => '01794263387',
-// ]);
+$manager->onAfterPaymentFailed(function($dto){
+    var_dump('Failed');
+});
 
-// $manager->gateway('nagad')->pay($payment);
+$payment = new PaystationDTO([
+    'invoiceNumber'    => rand(10000, 3000000),
+    'currency'          => 'BDT',
+    'amount'            => (string) rand(100, 1000),
+    'reference'         => (string) rand(100, 1000),
+    'customerName'     => 'Riyad Munauwar',
+    'customerPhone'    => '01794263387',
+    'customerEmail'    => 'riyadtest@gmail.com',
+    'customerAddress'  => 'Address: Dhaka, Mymensingh',
+    'checkoutItems'    => [],
+    'optionA'          => 'Hello',
+    'optionB'          => 'Hello',
+    'optionC'          => 'Hello',
+    'emi'               => 0,
+]);
+
+$res = $manager->gateway('paystation')->pay($payment);
+
+var_dump($res);
 
 // $manager->paymentSuccess(new PaymentResult([
 //     'id' => 'id',
@@ -98,29 +84,10 @@ class CreateTransction implements AfterPaymentSuccessContract
 //     'gateway' => 'giopay',
 // ]));
 
-$hookManager = HookRegistry::init();
+// $manager->gateway('nagad')->paymentFailed(new PaymentResult([
+//     'success' => true,
+// ]));
 
 
-// Configure 'after.payment.success' as single hook with return allowed
-// $hookManager->configureHook(
-//     'after.payment.success',
-//     allowMultiple: false,
-//     defaultPriority: 0,
-//     returnMode: HookReturnMode::SINGLE,
-//     strictContracts: [AfterPaymentSuccessContract::class]
-// );
 
-// Register by class name and declare contract(s)
-$hookManager->register(
-    'after.payment.success',
-    CreateTransction::class,
-    // 'Class',
-    // priority: 10,
-    contracts: [AfterPaymentSuccessContract::class]
-);
 
-$result = $hookManager->getHooks('after.payment.success');
-// Execute
-// $result = $hookManager->execute('after.payment.success', new PaymentResult(['id' => 'id', 'customerId' => 'isdfsd', 'transactionId' => 'sdfsdf', 'gateway' => 'giopay']), 'stripe');
-
-var_dump($result);

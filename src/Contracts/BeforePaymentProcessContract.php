@@ -24,5 +24,5 @@ interface BeforePaymentProcessContract
      *
      * @throws \RuntimeException If pre-processing fails or validation errors occur
      */
-    public function handle(Payment $dto, string $gatewayName): Payment;
+    public function handle(BaseDTO $dto, string $gatewayName): Payment;
 }

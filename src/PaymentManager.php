@@ -5,13 +5,16 @@ namespace Riyad\Polypay;
 use Riyad\Polypay\Contracts\PaymentManagerContract;
 use Riyad\Polypay\Contracts\GatewayContract;
 use Riyad\Polypay\Contracts\GatewayRegistryContract;
-use Riyad\Polypay\DTO\Payment;
+use Riyad\Polypay\DTO\BaseDTO;
 use Riyad\Polypay\DTO\PaymentResult;
 use Riyad\Polypay\Constants\Hook;
+use Riyad\Polypay\Constants\HookReturnMode;
 use Riyad\Polypay\Contracts\BeforePaymentProcessContract;
 use Riyad\Polypay\Contracts\AfterPaymentSuccessContract;
 use Riyad\Polypay\Contracts\AfterPaymentFailedContract;
 use Riyad\Polypay\Contracts\HookRegistryContract;
+use Riyad\Polypay\Contracts\SupportPaymentVerification;
+use Riyad\Polypay\Exceptions\UnsupportedFeatureException;
 
 /**
  * Class PaymentManager
@@ -132,18 +135,30 @@ class PaymentManager implements PaymentManagerContract
     }
 
     /**
+     * Get the gateway instance from the registry.
+     *
+     * @param string $gateway The identifier of the gateway to retrieve.
+     *
+     * @return GatewayContract The resolved gateway instance.
+     */
+    public function getGateway(string $gateway) : GatewayContract
+    {
+        return $this->registry->get($gateway);
+    }
+
+    /**
      * Process a payment through the currently selected gateway.
      *
      * @param Payment $dto Payment data transfer object
      * @return PaymentResult
      * @throws \RuntimeException if no gateway is selected or DTO is invalid
      */
-    public function pay(Payment $dto): PaymentResult
+    public function pay(BaseDTO $dto): PaymentResult
     {
         $this->ensureGatewayIsSelected();
 
-        if (!$dto instanceof Payment) {
-            throw new \RuntimeException("Payment must return an instance of Payment DTO.");
+        if (!$dto instanceof BaseDTO) {
+            throw new \RuntimeException("Provided DTO must return an instance of BaseDTO");
         }
 
         // Execute beforePaymentProcess hook
@@ -157,6 +172,35 @@ class PaymentManager implements PaymentManagerContract
         $result = $this->currentGateway->pay($dto);
 
         return $result;
+    }
+
+    /**
+     * Verify a payment using the specified gateway.
+     *
+     * Retrieves the gateway instance from the registry and ensures it supports
+     * payment verification. If the gateway does not implement
+     * SupportPaymentVerification, an UnsupportedFeatureException is thrown.
+     *
+     * @param PaymentVerification $dto Data Transfer Object containing payment verification details.
+     * @param string $gateway Identifier of the gateway to be used for verification.
+     *
+     * @return bool Returns true if the payment is successfully verified, otherwise false.
+     *
+     * @throws UnsupportedFeatureException If the gateway does not support payment verification.
+     */
+    public function verify(BaseDTO $dto) : bool
+    {
+        $this->ensureGatewayIsSelected();
+
+        $gatewayInstance = $this->currentGateway;
+
+        if (!$gatewayInstance instanceof SupportPaymentVerification) {
+            throw new UnsupportedFeatureException(
+                sprintf('Gateway [%s] does not support payment verification.', $gateway)
+            );
+        }
+
+        return $gatewayInstance->verify($dto, $gateway);
     }
 
     /**
@@ -205,13 +249,23 @@ class PaymentManager implements PaymentManagerContract
      */
     public function onBeforePaymentProcess(string|callable|BeforePaymentProcessContract $hook): void
     {
-        $this->hookRegistry->configureHook(
-            Hook::BEFORE_PAYMENT_PROCESS,
-            allowMultiple: false,
-            defaultPriority: 0,
-            returnMode: HookReturnMode::SINGLE,
-            strictContracts: [BeforePaymentProcessContract::class]
-        );
+        if(is_callable($hook)){
+            $this->hookRegistry->configureHook(
+                Hook::BEFORE_PAYMENT_PROCESS,
+                allowMultiple: false,
+                defaultPriority: 0,
+                returnMode: HookReturnMode::SINGLE,
+            );
+
+        }else {
+            $this->hookRegistry->configureHook(
+                Hook::BEFORE_PAYMENT_PROCESS,
+                allowMultiple: false,
+                defaultPriority: 0,
+                returnMode: HookReturnMode::SINGLE,
+                strictContracts: [BeforePaymentProcessContract::class]
+            );
+        }
 
         $this->hookRegistry->register(
             Hook::BEFORE_PAYMENT_PROCESS,
@@ -227,13 +281,22 @@ class PaymentManager implements PaymentManagerContract
      */
     public function onAfterPaymentSuccess(string|callable|AfterPaymentSuccessContract $hook): void
     {
-        $this->hookRegistry->configureHook(
-            Hook::AFTER_PAYMENT_SUCCESS,
-            allowMultiple: false,
-            defaultPriority: 0,
-            returnMode: HookReturnMode::SINGLE,
-            strictContracts: [AfterPaymentSuccessContract::class]
-        );
+        if(is_callable($hook)){
+            $this->hookRegistry->configureHook(
+                Hook::AFTER_PAYMENT_SUCCESS,
+                allowMultiple: false,
+                defaultPriority: 0,
+                returnMode: HookReturnMode::SINGLE,
+            );
+        }else{
+            $this->hookRegistry->configureHook(
+                Hook::AFTER_PAYMENT_SUCCESS,
+                allowMultiple: false,
+                defaultPriority: 0,
+                returnMode: HookReturnMode::SINGLE,
+                strictContracts: [AfterPaymentSuccessContract::class]
+            );
+        }
 
         $this->hookRegistry->register(
             Hook::AFTER_PAYMENT_SUCCESS,
@@ -249,13 +312,22 @@ class PaymentManager implements PaymentManagerContract
      */
     public function onAfterPaymentFailed(string|callable|AfterPaymentFailedContract $hook): void
     {
-        $this->hookRegistry->configureHook(
-            Hook::AFTER_PAYMENT_SUCCESS,
-            allowMultiple: false,
-            defaultPriority: 0,
-            returnMode: HookReturnMode::SINGLE,
-            strictContracts: [AfterPaymentFailedContract::class]
-        );
+        if(is_callable($hook)){
+            $this->hookRegistry->configureHook(
+                Hook::AFTER_PAYMENT_FAILED,
+                allowMultiple: false,
+                defaultPriority: 0,
+                returnMode: HookReturnMode::SINGLE,
+            );
+        }else{
+            $this->hookRegistry->configureHook(
+                Hook::AFTER_PAYMENT_FAILED,
+                allowMultiple: false,
+                defaultPriority: 0,
+                returnMode: HookReturnMode::SINGLE,
+                strictContracts: [AfterPaymentFailedContract::class]
+            );
+        }
 
         $this->hookRegistry->register(
             Hook::AFTER_PAYMENT_FAILED,
@@ -310,233 +382,3 @@ class PaymentManager implements PaymentManagerContract
         }
     }
 }
-
-// class PaymentManager implements PaymentManagerContract
-// {
-//     private static ?self $instance = null;
-
-//     private GatewayRegistryContract $registry;
-
-//     private HookRegistryContract $hookRegistry;
-
-//     private ?GatewayContract $currentGateway = null;
-
-//     /**
-//      * Private to prevent outside instantiation.
-//      */
-//     private function __construct(GatewayRegistryContract $registry, HookRegistryContract $hookRegistry)
-//     {
-//         $this->registry = $registry;
-//         $this->hookRegistry = $hookRegistry;
-//     }
-
-//     /**
-//      * Initialize the singleton (only first call sets registry).
-//      */
-//     public static function init(GatewayRegistryContract $registry, HookRegistryContract $hookRegistry): self
-//     {
-//         if (!self::$instance) {
-//             self::$instance = new self($registry, $hookRegistry);
-//         }
-//         return self::$instance;
-//     }
-
-//     /**
-//      * Get the existing singleton instance.
-//      */
-//     public static function instance(): self
-//     {
-//         if (!self::$instance) {
-//             throw new \RuntimeException("PaymentManager not initialized. Call PaymentManager::init() first.");
-//         }
-//         return self::$instance;
-//     }
-
-//         /**
-//      * Register a gateway factory with optional metadata.
-//      *
-//      * @param string $name Unique gateway name
-//      * @param callable $factory Factory that returns an instance of GatewayContract
-//      * @param array $meta Optional metadata about the gateway
-//      *
-//      * @throws \InvalidArgumentException If name is empty or factory is not callable
-//      */
-//     public function register(string $name, callable $factory, array $meta = []): void
-//     {
-//         $this->registry->register($name, $factory, $meta);
-//     }
-
-//     /**
-//      * Unregister a gateway.
-//      *
-//      * @param string $name
-//      *
-//      * @throws GatewayNotFoundException If the gateway is not registered
-//      */
-//     public function unregister(string $name): void
-//     {
-//         $this->registry->unregister($name);
-//     }
-
-//     /**
-//      * Set the active gateway.
-//      */
-//     public function gateway(string $gateway): static
-//     {
-//         $this->currentGateway = $this->registry->get($gateway);
-//         return $this;
-//     }
-
-//     /**
-//      * Process a payment.
-//      */
-//     public function pay(Payment $dto): PaymentResult
-//     {
-//         $this->ensureGatewayIsSelected();
-        
-//         if (!$dto instanceof Payment) {
-//             throw new \RuntimeException("Payment must return an instance of Payment DTO.");
-//         }
-
-//         // Execute beforePaymentProcess hook
-//         $dto = $this->hookRegistry->execute(Hook::BEFORE_PAYMENT_PROCESS, $dto, $this->currentGateway->name());
-
-//         // Process payment via gateway
-//         $result = $this->currentGateway->pay($dto);
-
-//         return $result;
-//     }
-
-//     /**
-//      * Apply a callback to all gateways and return the results.
-//      *
-//      * @param callable $callback function(GatewayContract $gateway): mixed
-//      * @return array<string, mixed>
-//      */
-//     public function map(callable $callback): array
-//     {
-//         $results = [];
-
-//         foreach ($this->registry->all(false) as $name) {
-//             $gateway = $this->registry->get($name); // ensures it's instantiated
-//             $results[] = $callback($gateway);
-//         }
-
-//         return $results;
-//     }
-
-//     /**
-//      * Filter gateways using a callback.
-//      *
-//      * @param callable $callback function(GatewayContract $gateway): bool
-//      * @return array<string, GatewayContract>
-//      */
-//     public function filter(callable $callback): array
-//     {
-//         $filtered = [];
-
-//         foreach ($this->registry->all(false) as $name) {
-//             $gateway = $this->registry->get($name);
-//             if ($callback($gateway)) {
-//                 $filtered[$name] = $gateway;
-//             }
-//         }
-
-//         return $filtered;
-//     }
-
-
-//     /**
-//      * Add a before payment process hook.
-//      */
-//     public function onBeforePaymentProcess(string|callable|BeforePaymentProcessContract $hook): void
-//     {
-//         $this->hookRegistry->configureHook(
-//             Hook::BEFORE_PAYMENT_PROCESS,
-//             allowMultiple: false,
-//             defaultPriority: 0,
-//             returnMode: HookReturnMode::SINGLE,
-//             strictContracts: [BeforePaymentProcessContract::class]
-//         );
-
-//         $this->hookRegistry->register(
-//             Hook::BEFORE_PAYMENT_PROCESS,
-//             $hook,
-//         );
-//     }
-
-//     /**
-//      * Add an after payment success hook.
-//      */
-//     public function onAfterPaymentSuccess(string|callable|AfterPaymentSuccessContract $hook): void
-//     {
-//         $this->hookRegistry->configureHook(
-//             Hook::AFTER_PAYMENT_SUCCESS,
-//             allowMultiple: false,
-//             defaultPriority: 0,
-//             returnMode: HookReturnMode::SINGLE,
-//             strictContracts: [AfterPaymentSuccessContract::class]
-//         );
-
-//         $this->hookRegistry->register(
-//             Hook::AFTER_PAYMENT_SUCCESS,
-//             $hook,
-//         );
-//     }
-
-//     /**
-//      * Add an after payment failed hook.
-//      */
-//     public function onAfterPaymentFailed(string|callable|AfterPaymentFailedContract $hook): void
-//     {
-//         $this->hookRegistry->configureHook(
-//             Hook::AFTER_PAYMENT_SUCCESS,
-//             allowMultiple: false,
-//             defaultPriority: 0,
-//             returnMode: HookReturnMode::SINGLE,
-//             strictContracts: [AfterPaymentFailedContract::class]
-//         );
-
-//         $this->hookRegistry->register(
-//             Hook::AFTER_PAYMENT_FAILED,
-//             $hook,
-//         );
-//     }
-
-//     /**
-//      * Execute success hooks.
-//      */
-//     public function paymentSuccess(PaymentResult $dto): mixed
-//     {
-//         $this->ensureGatewayIsSelected();
-
-//         return $this->hookRegistry->execute(Hook::AFTER_PAYMENT_SUCCESS, $dto, $this->currentGateway->name());
-//     }
-
-//     /**
-//      * Execute failed hooks.
-//      */
-//     public function paymentFailed(PaymentResult $dto): mixed
-//     {
-//         $this->ensureGatewayIsSelected();
-
-//         return $this->hookRegistry->execute(Hook::AFTER_PAYMENT_FAILED, $dto, $this->currentGateway->name());
-//     }
-
-
-//     /**
-//      * Ensure that a payment gateway has been selected.
-//      *
-//      * This method checks if the current gateway is set. 
-//      * If no gateway has been selected, it throws a RuntimeException.
-//      *
-//      * @throws \RuntimeException if no gateway is selected
-//      */
-//     private function ensureGatewayIsSelected(): void
-//     {
-//         if (!$this->currentGateway) {
-//             throw new \RuntimeException("No gateway selected. Please call gateway() before proceeding.");
-//         }
-//     }
-
-// }
