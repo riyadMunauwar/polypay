@@ -7,6 +7,7 @@ use Riyad\Polypay\Contracts\GatewayContract;
 use Riyad\Polypay\Contracts\GatewayRegistryContract;
 use Riyad\Polypay\DTO\BaseDTO;
 use Riyad\Polypay\DTO\PaymentResult;
+use Riyad\Polypay\DTO\VerificationResult;
 use Riyad\Polypay\Constants\Hook;
 use Riyad\Polypay\Constants\HookReturnMode;
 use Riyad\Polypay\Contracts\BeforePaymentProcessContract;
@@ -188,7 +189,7 @@ class PaymentManager implements PaymentManagerContract
      *
      * @throws UnsupportedFeatureException If the gateway does not support payment verification.
      */
-    public function verify(BaseDTO $dto) : bool
+    public function verify(BaseDTO $dto) : VerificationResult
     {
         $this->ensureGatewayIsSelected();
 
@@ -200,7 +201,7 @@ class PaymentManager implements PaymentManagerContract
             );
         }
 
-        return $gatewayInstance->verify($dto, $gateway);
+        return $gatewayInstance->verify($dto);
     }
 
     /**

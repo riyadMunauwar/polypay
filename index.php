@@ -6,6 +6,7 @@ use Riyad\Polypay\DTO\Config;
 use Riyad\Polypay\DTO\PaystationDTO;
 use Riyad\Polypay\DTO\PaymentResult;
 use Riyad\Polypay\DTO\PaystationGatewayConfig;
+use Riyad\Polypay\DTO\PaystationVerificationDTO;
 use Riyad\Polypay\PaymentManager;
 use Riyad\Polypay\GatewayRegistry;
 use Riyad\Polypay\Gateways\Paystation;
@@ -15,6 +16,7 @@ use Riyad\Polypay\Contracts\AfterPaymentFailedContract;
 use Riyad\Polypay\Contracts\HookContract;
 use Riyad\Polypay\Constants\HookReturnMode;
 use Riyad\Polypay\HookRegistry;
+
 
 $registry = GatewayRegistry::init();
 $hookRegistry = HookRegistry::init();
@@ -32,8 +34,6 @@ class CreateTransction implements AfterPaymentSuccessContract
     public function handle(PaymentResult $dto, string $gatewayName) : mixed
     {
         var_dump('Continue...');
-        var_dump($gatewayName);
-
         return $dto;
     }
 }
@@ -45,7 +45,6 @@ $manager->onBeforePaymentProcess(function($dto, $gatewayName){
 });
 
 $manager->onBeforePaymentProcess(function($dto, $gateway){
-    var_dump($dto);
     return $dto;
 });
 
@@ -73,7 +72,8 @@ $payment = new PaystationDTO([
     'emi'               => 0,
 ]);
 
-$res = $manager->gateway('paystation')->pay($payment);
+// $res = $manager->gateway('paystation')->pay($payment);
+$res = $manager->gateway('paystation')->verify(new PaystationVerificationDTO(['transactionId' => '$sdfsdf']));
 
 var_dump($res);
 

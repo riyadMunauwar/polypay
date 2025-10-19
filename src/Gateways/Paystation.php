@@ -8,6 +8,7 @@ use Riyad\Polypay\DTO\Config;
 use Riyad\Polypay\DTO\PaymentResult;
 use Riyad\Polypay\DTO\BaseDTO;
 use Riyad\Polypay\GatewayRegistry;
+use Riyad\Polypay\DTO\VerificationResult;
 
 class Paystation extends AbstractGateway implements SupportPaymentVerification
 {
@@ -107,9 +108,49 @@ class Paystation extends AbstractGateway implements SupportPaymentVerification
     }
 
 
-    public function verify(BaseDTO $dto, string $gateway) : bool 
+    public function verify(BaseDTO $dto) : VerificationResult 
     {
-        return true;
+        $headers = [
+            "merchantId:{$this->merchantId}",
+        ];
+
+        $data = [
+            'trxid' => $dto->transactionId,
+        ];
+
+        try {
+                         
+            $response = $this->verifyTransaction($data, $headers);
+
+            if($response['status_code'] != 200){
+                return new VerificationResult([
+                    'success' => false,
+                    'message' => 'Failed',
+                    'gatewayResponse' => $response,
+                    'gateway' => $this->name(),
+                ]);
+            }
+
+            return new VerificationResult([
+                'success' => true,
+                'message' => 'Transaction found',
+                'gatewayResponse' => $response,
+                'gateway' => $this->name(),
+            ]);
+
+        } catch(\RuntimeException $ex) {
+            return new VerificationResult([
+                'success' => false,
+                'message' => $ex->getMessage(),
+            ]);
+
+        } catch (\Exception $ex) {
+            return new VerificationResult([
+                'success' => false,
+                'message' => $ex->getMessage(),
+            ]);
+
+        }
     }
 
     
@@ -166,7 +207,7 @@ class Paystation extends AbstractGateway implements SupportPaymentVerification
     }
 
 
-    private function verifyTransaction(array $data): array
+    private function verifyTransaction(array $data, array $headers = []): array
     {
         $url = $this->baseUrl . '/transaction-status';
 
@@ -189,6 +230,7 @@ class Paystation extends AbstractGateway implements SupportPaymentVerification
             CURLOPT_FOLLOWLOCATION => true,
             CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
             CURLOPT_CUSTOMREQUEST => 'POST',
+            CURLOPT_HTTPHEADER => $headers,
             CURLOPT_POSTFIELDS => $postFields,
             CURLOPT_HTTPHEADER => [
                 'Content-Type: application/x-www-form-urlencoded',

@@ -3,6 +3,7 @@
 namespace Riyad\Polypay\Contracts;
 
 use Riyad\Polypay\DTO\BaseDTO;
+use Riyad\Polypay\DTO\VerificationResult;
 
 /**
  * Interface SupportPaymentVerification
@@ -20,5 +21,5 @@ interface SupportPaymentVerification
      *
      * @return bool Returns true if the payment is successfully verified, otherwise false.
      */
-    public function verify(BaseDTO $dto): bool;
+    public function verify(BaseDTO $dto) : VerificationResult;
 }

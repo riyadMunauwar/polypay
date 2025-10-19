@@ -4,6 +4,7 @@ namespace Riyad\Polypay\Contracts;
 
 use Riyad\Polypay\Contracts\GatewayContract;
 use Riyad\Polypay\DTO\BaseDTO;
+use Riyad\Polypay\DTO\VerificationResult;
 use Riyad\Polypay\DTO\PaymentResult;
 use Riyad\Polypay\DTO\PaymentVerification;
 
@@ -75,7 +76,7 @@ interface PaymentManagerContract
      *
      * @return bool True if the payment is successfully verified, otherwise false.
      */
-    public function verify(PaymentVerification $dto) : bool;
+    public function verify(PaymentVerification $dto) : VerificationResult;
 
     /**
      * Apply a callback function to all registered gateways and collect results.
