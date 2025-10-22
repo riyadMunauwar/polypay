@@ -1,8 +1,8 @@
 <?php
 
-namespace Riyad\Polypay\Contracts;
+namespace Riyad\PolyPay\Contracts;
 
-use Riyad\Polypay\Contracts\GatewayContract;
+use Riyad\PolyPay\Contracts\GatewayContract;
 
 /**
  * Interface GatewayRegistryContract

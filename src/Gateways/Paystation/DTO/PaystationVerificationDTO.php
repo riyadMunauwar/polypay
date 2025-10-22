@@ -1,6 +1,8 @@
 <?php
 
-namespace Riyad\Polypay\DTO;
+namespace Riyad\PolyPay\Gateways\Paystation\DTO;
+
+use Riyad\PolyPay\DTO\BaseDTO;
 
 class PaystationVerificationDTO extends BaseDTO
 {

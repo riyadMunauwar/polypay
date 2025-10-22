@@ -1,10 +1,10 @@
 <?php
 
-namespace Riyad\Polypay;
+namespace Riyad\PolyPay;
 
-use Riyad\Polypay\Contracts\GatewayRegistryContract;
-use Riyad\Polypay\Contracts\GatewayContract;
-use Riyad\Polypay\Exceptions\GatewayNotFoundException;
+use Riyad\PolyPay\Contracts\GatewayRegistryContract;
+use Riyad\PolyPay\Contracts\GatewayContract;
+use Riyad\PolyPay\Exceptions\GatewayNotFoundException;
 
 /**
  * Class GatewayRegistry

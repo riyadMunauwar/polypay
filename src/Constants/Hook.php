@@ -1,6 +1,6 @@
 <?php 
 
-namespace Riyad\Polypay\Constants;
+namespace Riyad\PolyPay\Constants;
 
 /**
  * Class Hook
@@ -23,15 +23,8 @@ final class Hook
     /** 
      * Hook name executed before a payment is processed.
      */
-    public const BEFORE_PAYMENT_PROCESS = 'beforePaymentProcess';
-
-    /** 
-     * Hook name executed after a payment fails.
-     */
-    public const AFTER_PAYMENT_FAILED = 'afterPaymentFailed';
-
-    /** 
-     * Hook name executed after a payment succeeds.
-     */
-    public const AFTER_PAYMENT_SUCCESS = 'afterPaymentSuccess';
+    public const BEFORE_PAYMENT_PROCESS = 'pay.beforePaymentProcess';
+    public const AFTER_PAYMENT_PROCESS = 'pay.afterPaymentProcess';
+    public const AFTER_PAYMENT_FAILED = 'pay.afterPaymentFailed';
+    public const AFTER_PAYMENT_SUCCESS = 'pay.afterPaymentSuccess';
 }

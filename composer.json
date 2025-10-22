@@ -1,11 +1,11 @@
 {
-    "name": "riyad/polypay",
+    "name": "devriyad/polypay",
     "description": "Unified payment gateway interface for Laravel/PHP with pluggable drivers for bKash, SSLCommerz, Stripe, PayPal, and more.",
     "type": "library",
     "license": "MIT",
     "autoload": {
         "psr-4": {
-            "Riyad\\Polypay\\": "src/"
+            "Riyad\\PolyPay\\": "src/"
         }
     },
     "authors": [
@@ -15,5 +15,8 @@
         }
     ],
     "minimum-stability": "stable",
-    "require": {}
+    "require": {
+        "php": "^8.1",
+        "devriyad/hooks": "^0.1.4"
+    }
 }

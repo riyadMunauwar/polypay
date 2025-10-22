@@ -1,12 +1,12 @@
 <?php
 
-namespace Riyad\Polypay\Contracts;
+namespace Riyad\PolyPay\Contracts;
 
-use Riyad\Polypay\Contracts\GatewayContract;
-use Riyad\Polypay\DTO\BaseDTO;
-use Riyad\Polypay\DTO\VerificationResult;
-use Riyad\Polypay\DTO\PaymentResult;
-use Riyad\Polypay\DTO\PaymentVerification;
+use Riyad\PolyPay\Contracts\GatewayContract;
+use Riyad\PolyPay\DTO\BaseDTO;
+use Riyad\PolyPay\DTO\VerificationResult;
+use Riyad\PolyPay\DTO\PaymentResult;
+use Riyad\PolyPay\DTO\PaymentVerification;
 
 /**
  * Interface PaymentManagerContract
@@ -47,36 +47,7 @@ interface PaymentManagerContract
      *
      * @throws GatewayNotFoundException If the gateway is not registered
      */
-    public function gateway(string $gateway): static;
-
-    /**
-     * Retrieve a payment gateway instance by its identifier.
-     *
-     * @param string $gateway The identifier or name of the gateway to retrieve.
-     *
-     * @return GatewayContract The resolved gateway instance.
-     */
-    public function getGateway(string $gateway) : GatewayContract;
-
-    /**
-     * Process a payment using the currently active gateway.
-     *
-     * @param Payment $dto Payment data transfer object
-     * @return PaymentResult The result of the payment processing
-     *
-     * @throws \RuntimeException If no gateway is selected
-     */
-    public function pay(BaseDTO $dto): PaymentResult;
-
-    /**
-     * Verify a payment using the provided gateway.
-     *
-     * @param PaymentVerification $dto     Data Transfer Object containing verification details.
-     * @param string              $gateway Identifier for the payment gateway to use.
-     *
-     * @return bool True if the payment is successfully verified, otherwise false.
-     */
-    public function verify(PaymentVerification $dto) : VerificationResult;
+    public function gateway(string $gateway): GatewayContract;
 
     /**
      * Apply a callback function to all registered gateways and collect results.
@@ -95,30 +66,6 @@ interface PaymentManagerContract
     public function filter(callable $callback): array;
 
     /**
-     * Register a hook to execute before payment processing.
-     *
-     * @param string|callable|BeforePaymentProcessContract $hook The hook to execute
-     * @return void
-     */
-    public function onBeforePaymentProcess(string|callable|BeforePaymentProcessContract $hook): void;
-
-    /**
-     * Register a hook to execute after successful payment.
-     *
-     * @param string|callable|AfterPaymentSuccessContract $hook The hook to execute
-     * @return void
-     */
-    public function onAfterPaymentSuccess(string|callable|AfterPaymentSuccessContract $hook): void;
-
-    /**
-     * Register a hook to execute after failed payment.
-     *
-     * @param string|callable|AfterPaymentFailedContract $hook The hook to execute
-     * @return void
-     */
-    public function onAfterPaymentFailed(string|callable|AfterPaymentFailedContract $hook): void;
-
-    /**
      * Execute all registered hooks for a successful payment.
      *
      * @param PaymentResult $dto The result of the payment
@@ -126,7 +73,7 @@ interface PaymentManagerContract
      *
      * @throws \RuntimeException If no gateway is selected
      */
-    public function paymentSuccess(PaymentResult $dto): mixed;
+    public function paymentSuccess(string $gateway, PaymentResult $dto): void;
 
     /**
      * Execute all registered hooks for a failed payment.
@@ -136,5 +83,5 @@ interface PaymentManagerContract
      *
      * @throws \RuntimeException If no gateway is selected
      */
-    public function paymentFailed(PaymentResult $dto): mixed;
+    public function paymentFailed(string $gateway, PaymentResult $dto): void;
 }

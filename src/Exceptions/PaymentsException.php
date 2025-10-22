@@ -1,5 +1,5 @@
 <?php
 
-namespace Riyad\Polypay\Exceptions;
+namespace Riyad\PolyPay\Exceptions;
 
 class PaymentsException extends \Exception {}

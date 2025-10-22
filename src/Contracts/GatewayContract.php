@@ -1,10 +1,11 @@
 <?php
 
-namespace Riyad\Polypay\Contracts;
+namespace Riyad\PolyPay\Contracts;
 
-use Riyad\Polypay\DTO\BaseDTO;
-use Riyad\Polypay\DTO\PaymentResult;
-use Riyad\Polypay\DTO\Config;
+use Riyad\PolyPay\DTO\BaseDTO;
+use Riyad\PolyPay\DTO\PaymentResult;
+use Riyad\PolyPay\DTO\Config;
+use Riyad\PolyPay\DTO\VerificationResult;
 
 /**
  * Interface GatewayContract
@@ -43,4 +44,14 @@ interface GatewayContract
      * @throws \RuntimeException If payment cannot be processed or fails due to gateway errors
      */
     public function pay(BaseDTO $dto): PaymentResult;
+
+
+    /**
+     * Handle payment verification.
+     *
+     * @param PaymentVerification $dto Data Transfer Object containing payment verification details.
+     *
+     * @return bool Returns true if the payment is successfully verified, otherwise false.
+     */
+    public function verify(BaseDTO $dto) : VerificationResult;
 }

@@ -1,6 +1,6 @@
 <?php
 
-namespace Riyad\Polypay\DTO;
+namespace Riyad\PolyPay\DTO;
 
 class VerificationResult extends BaseDTO
 {

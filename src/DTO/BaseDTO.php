@@ -1,6 +1,6 @@
 <?php
 
-namespace Riyad\Polypay\DTO;
+namespace Riyad\PolyPay\DTO;
 
 use JsonSerializable;
 use InvalidArgumentException;
