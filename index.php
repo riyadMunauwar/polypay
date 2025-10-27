@@ -44,7 +44,7 @@ $manager = PaymentManager::init($registry);
 
 $manager->register('paystation', function(){
     return new Paystation();
-}, ['config' => new PaystationGatewayConfig(['merchantId' => '1066-1746978236', 'password' => 'B@k$8236', 'callbackUrl' => 'Hello', 'payWithCharge' => true])]);
+}, ['config' => new PaystationGatewayConfig(['merchantId' => '1066', 'password' => 'B@k', 'callbackUrl' => 'Hello', 'payWithCharge' => true])]);
 
 
 $payment = new PaystationDTO([
