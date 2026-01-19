@@ -44,7 +44,7 @@ $manager = PaymentManager::init($registry);
 
 $manager->register('paystation', function(){
     return new Paystation();
-}, ['config' => new PaystationGatewayConfig(['merchantId' => '1066', 'password' => 'B@k', 'callbackUrl' => 'Hello', 'payWithCharge' => true])]);
+}, ['config' => new PaystationGatewayConfig(['merchantId' => '1066', 'password' => 'B@', 'payWithCharge' => true])]);
 
 
 $payment = new PaystationDTO([
@@ -56,6 +56,7 @@ $payment = new PaystationDTO([
     'customerPhone'    => '01794263387',
     'customerEmail'    => 'riyadtest@gmail.com',
     'customerAddress'  => 'Address: Dhaka, Mymensingh',
+    'callbackUrl' => 'Hello',
     'checkoutItems'    => [],
     'optionA'          => 'Hello',
     'optionB'          => 'Hello',
@@ -63,10 +64,10 @@ $payment = new PaystationDTO([
     'emi'               => 0,
 ]);
 
-// $res = $manager->gateway('paystation')->pay($payment);
+$res = $manager->gateway('paystation')->pay($payment);
 // $res = $manager->gateway('paystation')->verify(new PaystationVerificationDTO(['transactionId' => '$sdfsdf']));
 
-// var_dump($res);
+var_dump($res);
 
 $manager->paymentSuccess('paystation', new PaymentResult([
     'success' => true,

@@ -17,7 +17,6 @@ class Paystation extends AbstractGateway
 {
     private string $merchantId;
     private string $password;
-    private string $callbackUrl;
     private string $payWithCharge;
     private Http $client;
     private PayHook $hook;
@@ -32,7 +31,6 @@ class Paystation extends AbstractGateway
         $this->hook = PayHook::instance();
         $this->merchantId = $metaData->merchantId;
         $this->password = $metaData->password;
-        $this->callbackUrl = $metaData->callbackUrl;
         $this->payWithCharge = $metaData->payWithCharge;
     }
 
@@ -69,7 +67,7 @@ class Paystation extends AbstractGateway
             'cust_phone'      => $dto->customerPhone,
             'cust_email'      => $dto->customerEmail,
             'cust_address'    => $dto->customerAddress ?? '',
-            'callback_url'    => $this->callbackUrl, 
+            'callback_url'    => $dto->callbackUrl, 
             'checkout_items'  => $dto->checkoutItems,
             'opt_a'           => $dto->optionA,
             'opt_b'           => $dto->optionB,
@@ -85,7 +83,7 @@ class Paystation extends AbstractGateway
                 return new PaymentResult([
                     'success' => false,
                     'message' => 'Failed to created payment links',
-                    'gatewayResponse' => $response,
+                    'response' => $response,
                     'gateway' => $this->name(),
                 ]);
             }
@@ -93,7 +91,7 @@ class Paystation extends AbstractGateway
             $successDto = new PaymentResult([
                 'success' => true,
                 'message' => 'Successfully payment link created',
-                'gatewayResponse' => $response,
+                'response' => $response,
                 'paymentUrl' => $response['payment_url'],
                 'gateway' => $this->name(),
             ]);
@@ -137,7 +135,7 @@ class Paystation extends AbstractGateway
                 return new VerificationResult([
                     'success' => false,
                     'message' => 'Failed',
-                    'gatewayResponse' => $response,
+                    'response' => $response,
                     'gateway' => $this->name(),
                 ]);
             }
@@ -145,7 +143,7 @@ class Paystation extends AbstractGateway
             return new VerificationResult([
                 'success' => true,
                 'message' => 'Transaction found',
-                'gatewayResponse' => $response,
+                'response' => $response,
                 'gateway' => $this->name(),
             ]);
 

@@ -13,6 +13,7 @@ class PaystationDTO extends BaseDTO
     public string $customerName;
     public string $customerPhone;
     public string $customerEmail;
+    public string $callbackUrl;
     public ?string $customerAddress;
     public ?array $checkoutItems;
     public ?string $optionA;

@@ -8,6 +8,5 @@ class PaystationGatewayConfig extends BaseDTO
 {
     public string $merchantId;
     public string $password;
-    public string $callbackUrl;
     public bool $payWithCharge;
 }
