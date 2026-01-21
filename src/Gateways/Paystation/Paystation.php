@@ -124,7 +124,7 @@ class Paystation extends AbstractGateway
         ];
 
         $data = [
-            'trxid' => $dto->transactionId,
+            'trxId' => $dto->transactionId,
         ];
 
         try {
