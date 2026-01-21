@@ -120,7 +120,7 @@ class Paystation extends AbstractGateway
     public function verify(BaseDTO $dto) : VerificationResult 
     {
         $headers = [
-            "merchantId:{$this->merchantId}",
+            'merchantId' => $this->merchantId,
         ];
 
         $data = [
@@ -129,7 +129,7 @@ class Paystation extends AbstractGateway
 
         try {
                          
-            $response = $this->client->request(endpoint: '/transaction-status', method: 'POST', data: $data, headers: $headers, contentType: 'application/x-www-form-urlencoded')->json();
+            $response = $this->client->request(endpoint: '/v2/transaction-status', method: 'POST', data: $data, headers: $headers, contentType: 'application/x-www-form-urlencoded')->json();
 
             if($response['status_code'] != 200){
                 return new VerificationResult([

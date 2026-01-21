@@ -17,34 +17,34 @@ $registry = GatewayRegistry::init();
 
 $hook = PayHook::instance();
 
-$hook->addFilter(Hook::BEFORE_PAYMENT_PROCESS, function($dto){
-    var_dump('Before PROCESS');
+// $hook->addFilter(Hook::BEFORE_PAYMENT_PROCESS, function($dto){
+//     var_dump('Before PROCESS');
 
-    return $dto;
-});
+//     return $dto;
+// });
 
 
 
-$hook->addAction(Hook::AFTER_PAYMENT_PROCESS, function($res) {
-    var_dump('After process');
-});
+// $hook->addAction(Hook::AFTER_PAYMENT_PROCESS, function($res) {
+//     var_dump('After process');
+// });
 
-$hook->addAction(Hook::AFTER_PAYMENT_FAILED, function($gateway, $dto) {
-    var_dump($gateway);
-    var_dump($dto);
-});
+// $hook->addAction(Hook::AFTER_PAYMENT_FAILED, function($gateway, $dto) {
+//     var_dump($gateway);
+//     var_dump($dto);
+// });
 
-$hook->addAction(Hook::AFTER_PAYMENT_SUCCESS, function($gateway, $dto) {
-    var_dump($gateway);
-    var_dump($dto);
-});
+// $hook->addAction(Hook::AFTER_PAYMENT_SUCCESS, function($gateway, $dto) {
+//     var_dump($gateway);
+//     var_dump($dto);
+// });
 
 
 $manager = PaymentManager::init($registry);
 
 $manager->register('paystation', function(){
     return new Paystation();
-}, ['config' => new PaystationGatewayConfig(['merchantId' => '1066', 'password' => 'B@', 'payWithCharge' => true])]);
+}, ['config' => new PaystationGatewayConfig(['merchantId' => '1066', 'password' => 'B@k', 'payWithCharge' => true])]);
 
 
 $payment = new PaystationDTO([
@@ -65,19 +65,19 @@ $payment = new PaystationDTO([
 ]);
 
 $res = $manager->gateway('paystation')->pay($payment);
-// $res = $manager->gateway('paystation')->verify(new PaystationVerificationDTO(['transactionId' => '$sdfsdf']));
+$res = $manager->gateway('paystation')->verify(new PaystationVerificationDTO(['transactionId' => '2021252525']));
 
 var_dump($res);
 
-$manager->paymentSuccess('paystation', new PaymentResult([
-    'success' => true,
-    'message' => 'Success',
-    'gateway' => 'giopay',
-]));
+// $manager->paymentSuccess('paystation', new PaymentResult([
+//     'success' => true,
+//     'message' => 'Success',
+//     'gateway' => 'giopay',
+// ]));
 
-$manager->paymentFailed('paystation', new PaymentResult([
-    'success' => true,
-]));
+// $manager->paymentFailed('paystation', new PaymentResult([
+//     'success' => true,
+// ]));
 
 
 

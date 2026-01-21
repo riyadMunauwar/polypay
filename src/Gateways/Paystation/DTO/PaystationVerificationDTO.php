@@ -6,5 +6,5 @@ use Riyad\PolyPay\DTO\BaseDTO;
 
 class PaystationVerificationDTO extends BaseDTO
 {
-    public string $transactionId;
+    public string $transactionId = '';
 }

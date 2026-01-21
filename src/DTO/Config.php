@@ -4,7 +4,7 @@ namespace Riyad\PolyPay\DTO;
 
 class Config extends BaseDTO
 {
-    public string $displayName;
-    public string $description;
-    public string $logoUrl;
+    public string $displayName = '';
+    public string $description = '';
+    public string $logoUrl = '';
 }
